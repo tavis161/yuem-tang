@@ -8,8 +8,8 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Post()
-  async create(@Body('name') name: string, @Body('password') password: string): Promise<User> {
-    return this.userService.createUser(name, password);
+  async create(@Body('username') username: string, @Body('password') password: string): Promise<User> {
+    return this.userService.createUser(username, password);
   }
 
   @Get(':id')
