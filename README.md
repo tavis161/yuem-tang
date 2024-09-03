@@ -1,85 +1,289 @@
-<p align="center">
-  <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="120" alt="Nest Logo" /></a>
-</p>
 
-[circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
+# NestJS Loan Application
 
-  <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://coveralls.io/github/nestjs/nest?branch=master" target="_blank"><img src="https://coveralls.io/repos/github/nestjs/nest/badge.svg?branch=master#9" alt="Coverage" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
+This project is a REST API for managing loan transactions between individuals, implemented using NestJS. The application allows users to borrow and repay money, view debt summaries, and view transaction histories. It includes JWT-based authentication and is set up to run inside a Docker container with a PostgreSQL database.
 
-## Description
+## Prerequisites
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+- Node.js v18 or later
+- npm (Node Package Manager)
+- Docker and Docker Compose
+- PostgreSQL
 
-## Project setup
+## Installation
 
-```bash
-$ npm install
+1. Clone the repository:
+
+   ```bash
+   git clone https://github.com/your-repo/nestjs-loan-app.git
+   cd nestjs-loan-app
+   ```
+
+2. Install dependencies:
+
+   ```bash
+   npm install
+   ```
+
+## Environment Variables
+
+Create a `.env` file in the root directory of the project based on the `.env.example` file. Replace the placeholders with your own values.
+
+```plaintext
+JWT_SECRET=your_jwt_secret
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+DATABASE_USER=user
+DATABASE_PASSWORD=password
+DATABASE_NAME=database
 ```
 
-## Compile and run the project
+- `JWT_SECRET`: A random string for JWT authentication.
+- `DATABASE_*`: Credentials for connecting to the PostgreSQL database.
+
+## Running the Application
+
+### Without Docker
+
+1. Start the PostgreSQL database and create the required tables.
+2. Run the application:
+
+   ```bash
+   npm run start:dev
+   ```
+
+3. The application will be available at `http://localhost:3000`.
+
+### With Docker
+
+1. Build and run the application using Docker Compose:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+2. The application will be available at `http://localhost:3000`.
+
+## API Documentation
+
+### Authentication
+
+#### Login
+
+- **URL**: `/auth/login`
+- **Method**: `POST`
+- **Description**: Authenticates a user and returns a JWT token.
+- **Request Body**:
+
+  ```json
+  {
+    "username": "user1",
+    "password": "password123"
+  }
+  ```
+
+- **Response**:
+
+  - **Status**: `200 OK`
+  - **Body**:
+
+    ```json
+    {
+      "access_token": "your_jwt_token"
+    }
+    ```
+
+### Users
+
+#### Create User
+
+- **URL**: `/users`
+- **Method**: `POST`
+- **Description**: Creates a new user.
+- **Request Body**:
+
+  ```json
+  {
+    "username": "user1",
+    "password": "password123"
+  }
+  ```
+
+- **Response**:
+
+  - **Status**: `201 Created`
+  - **Body**:
+
+    ```json
+    {
+      "id": 1,
+      "username": "user1"
+    }
+    ```
+
+#### Get User
+
+- **URL**: `/users/:id`
+- **Method**: `GET`
+- **Description**: Retrieves a user by ID.
+- **Response**:
+
+  - **Status**: `200 OK`
+  - **Body**:
+
+    ```json
+    {
+      "id": 1,
+      "username": "user1"
+    }
+    ```
+
+### Transactions
+
+#### Borrow Money
+
+- **URL**: `/transactions/borrow`
+- **Method**: `POST`
+- **Description**: Borrow money from another user.
+- **Request Body**:
+
+  ```json
+  {
+    "lenderId": 2,
+    "borrowerId": 1,
+    "amount": 300
+  }
+  ```
+
+- **Response**:
+
+  - **Status**: `201 Created`
+  - **Body**:
+
+    ```json
+    {
+      "id": 1,
+      "lenderId": 2,
+      "borrowerId": 1,
+      "amount": 300,
+      "type": "borrow",
+      "date": "2024-08-28T12:34:56.789Z"
+    }
+    ```
+
+#### Repay Money
+
+- **URL**: `/transactions/repay`
+- **Method**: `POST`
+- **Description**: Repay money to another user.
+- **Request Body**:
+
+  ```json
+  {
+    "lenderId": 2,
+    "borrowerId": 1,
+    "amount": 100
+  }
+  ```
+
+- **Response**:
+
+  - **Status**: `201 Created`
+  - **Body**:
+
+    ```json
+    {
+      "id": 2,
+      "lenderId": 2,
+      "borrowerId": 1,
+      "amount": 100,
+      "type": "repay",
+      "date": "2024-08-28T12:35:56.789Z"
+    }
+    ```
+
+#### Get Transaction History
+
+- **URL**: `/transactions/:userId`
+- **Method**: `GET`
+- **Description**: Get transaction history for a specific user.
+- **Response**:
+
+  - **Status**: `200 OK`
+  - **Body**:
+
+    ```json
+    [
+      {
+        "id": 1,
+        "lenderId": 2,
+        "borrowerId": 1,
+        "amount": 300,
+        "type": "borrow",
+        "date": "2024-08-28T12:34:56.789Z"
+      },
+      {
+        "id": 2,
+        "lenderId": 2,
+        "borrowerId": 1,
+        "amount": 100,
+        "type": "repay",
+        "date": "2024-08-28T12:35:56.789Z"
+      }
+    ]
+    ```
+
+#### Get Debt Summary
+
+- **URL**: `/transactions/summary/:userId`
+- **Method**: `GET`
+- **Description**: Get a debt summary for a specific user.
+- **Response**:
+
+  - **Status**: `200 OK`
+  - **Body**:
+
+    ```json
+    {
+      "userId": 1,
+      "totalBorrowed": 300,
+      "totalRepaid": 100,
+      "currentDebt": 200
+    }
+    ```
+
+## Testing
+
+To run the unit tests for the application, use the following command:
 
 ```bash
-# development
-$ npm run start
-
-# watch mode
-$ npm run start:dev
-
-# production mode
-$ npm run start:prod
+npm run test
 ```
 
-## Run tests
+## Docker Usage
+
+### Building and Running the Docker Containers
+
+1. Build and run the Docker containers:
+
+   ```bash
+   docker-compose up --build
+   ```
+
+2. The NestJS application will be running on `http://localhost:3000` and the PostgreSQL database will be exposed on port `5432`.
+
+### Stopping the Containers
+
+To stop the Docker containers, use:
 
 ```bash
-# unit tests
-$ npm run test
-
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
+docker-compose down
 ```
 
-## Resources
+### Rebuilding the Containers
 
-Check out a few resources that may come in handy when working with NestJS:
+If you make changes to the code and need to rebuild the containers, use:
 
-- Visit the [NestJS Documentation](https://docs.nestjs.com) to learn more about the framework.
-- For questions and support, please visit our [Discord channel](https://discord.gg/G7Qnnhy).
-- To dive deeper and get more hands-on experience, check out our official video [courses](https://courses.nestjs.com/).
-- Visualize your application graph and interact with the NestJS application in real-time using [NestJS Devtools](https://devtools.nestjs.com).
-- Need help with your project (part-time to full-time)? Check out our official [enterprise support](https://enterprise.nestjs.com).
-- To stay in the loop and get updates, follow us on [X](https://x.com/nestframework) and [LinkedIn](https://linkedin.com/company/nestjs).
-- Looking for a job, or have a job to offer? Check out our official [Jobs board](https://jobs.nestjs.com).
-
-## Support
-
-Nest is an MIT-licensed open source project. It can grow thanks to the sponsors and support by the amazing backers. If you'd like to join them, please [read more here](https://docs.nestjs.com/support).
-
-## Stay in touch
-
-- Author - [Kamil Myśliwiec](https://twitter.com/kammysliwiec)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
-
-## License
-
-Nest is [MIT licensed](https://github.com/nestjs/nest/blob/master/LICENSE).
+```bash
+docker-compose up --build
+```
