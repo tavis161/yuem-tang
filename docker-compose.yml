@@ -6,8 +6,8 @@ services:
     container_name: postgres-db
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
-      POSTGRES_DB: database
+      POSTGRES_PASSWORD: test1234
+      POSTGRES_DB: yuem-tang
     volumes:
       - postgres-data:/var/lib/postgresql/data
       - ./init.sql:/docker-entrypoint-initdb.d/init.sql
@@ -17,14 +17,14 @@ services:
 
   app:
     build: .
-    container_name: nestjs-app
+    container_name: yuem-tang-app
     environment:
       DATABASE_HOST: db
       DATABASE_PORT: 5432
       DATABASE_USER: user
-      DATABASE_PASSWORD: password
-      DATABASE_NAME: database
-      JWT_SECRET: your_jwt_secret
+      DATABASE_PASSWORD: test1234
+      DATABASE_NAME: yuem-tang
+      JWT_SECRET: v56rA7iigy5oTRp4aSEig6skdkQZYlX9
     ports:
       - '3000:3000'
     depends_on:
