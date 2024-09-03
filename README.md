@@ -145,6 +145,13 @@ DATABASE_NAME=database
 - **URL**: `/transactions/borrow`
 - **Method**: `POST`
 - **Description**: Borrow money from another user.
+- **Request Header**:
+
+  ```json
+    Content-Type:application/json
+    Authorization:Bearer <TOKEN>
+  ```
+
 - **Request Body**:
 
   ```json
@@ -176,6 +183,13 @@ DATABASE_NAME=database
 - **URL**: `/transactions/repay`
 - **Method**: `POST`
 - **Description**: Repay money to another user.
+- **Request Header**:
+
+  ```json
+    Content-Type:application/json
+    Authorization:Bearer <TOKEN>
+  ```
+
 - **Request Body**:
 
   ```json
@@ -207,6 +221,13 @@ DATABASE_NAME=database
 - **URL**: `/transactions/:userId`
 - **Method**: `GET`
 - **Description**: Get transaction history for a specific user.
+- **Request Header**:
+
+  ```json
+    Content-Type:application/json
+    Authorization:Bearer <TOKEN>
+  ```
+
 - **Response**:
 
   - **Status**: `200 OK`
@@ -238,6 +259,13 @@ DATABASE_NAME=database
 - **URL**: `/transactions/summary/:userId`
 - **Method**: `GET`
 - **Description**: Get a debt summary for a specific user.
+- **Request Header**:
+
+  ```json
+    Content-Type:application/json
+    Authorization:Bearer <TOKEN>
+  ```
+  
 - **Response**:
 
   - **Status**: `200 OK`
