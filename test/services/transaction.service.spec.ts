@@ -36,10 +36,10 @@ describe('TransactionService', () => {
   it('should create a borrow transaction', async () => {
     const lender = new User();
     lender.id = 1;
-    lender.name = 'lender';
+    lender.username = 'lender';
     const borrower = new User();
     borrower.id = 2;
-    borrower.name = 'borrower';
+    borrower.username = 'borrower';
 
     jest.spyOn(userService, 'findOne').mockResolvedValueOnce(lender);
     jest.spyOn(userService, 'findOne').mockResolvedValueOnce(borrower);

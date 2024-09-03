@@ -41,7 +41,7 @@ describe('AuthService', () => {
 
   it('should validate a user', async () => {
     const user = new User();
-    user.name = 'test';
+    user.username = 'test';
     user.password = await bcrypt.hash('test', 10);
 
     jest.spyOn(userService, 'findByUsername').mockResolvedValue(user);

@@ -1,4 +1,5 @@
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn } from 'typeorm';
+import { ColumnNumericTransformer } from '../utils/transformer.util'
 import { User } from './user.entity';
 
 @Entity('transactions')
@@ -14,7 +15,7 @@ export class Transaction {
   @JoinColumn({ name: 'borrowerId' })
   borrower: User;
 
-  @Column('decimal', { precision: 10, scale: 2 })
+  @Column('decimal', { precision: 10, scale: 2 , transformer: new ColumnNumericTransformer()})
   amount: number;
 
   @Column({ type: 'varchar', length: 10 })

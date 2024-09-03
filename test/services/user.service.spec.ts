@@ -25,7 +25,7 @@ describe('UserService', () => {
 
   it('should create a user', async () => {
     const user = new User();
-    user.name = 'test';
+    user.username = 'test';
     user.password = 'test';
     
     jest.spyOn(repository, 'save').mockResolvedValue(user);

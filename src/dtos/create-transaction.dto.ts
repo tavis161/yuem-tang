@@ -1,5 +1,4 @@
 export class CreateTransactionDto {
-    lenderId: number;
-    borrowerId: number;
+    userId: number;
     amount: number;
 }
