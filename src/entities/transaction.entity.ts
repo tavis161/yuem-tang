@@ -19,7 +19,7 @@ export class Transaction {
   amount: number;
 
   @Column({ type: 'varchar', length: 10 })
-  type: 'borrow' | 'repay';
+  type: string;
 
   @Column({ type: 'timestamp', default: () => 'CURRENT_TIMESTAMP' })
   date: Date;

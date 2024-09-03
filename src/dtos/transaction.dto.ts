@@ -1,11 +1,7 @@
 export class TransactionDto {
-  lender: string;
-
-  borrower: string;
-
+  lenderUsername: string;
+  borrowerUsername: string;
   amount: number;
-
-  type: 'borrow' | 'repay';
-
+  type: string;
   date: Date;
 }

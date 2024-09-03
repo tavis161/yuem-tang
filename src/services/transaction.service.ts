@@ -1,129 +1,138 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { User } from '../entities/user.entity';
 import { Transaction } from '../entities/transaction.entity';
-import { UserService } from './user.service';
-import { CreateTransactionDto } from '../dtos/create-transaction.dto'
-import { TransactionDto } from '../dtos/transaction.dto'
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { TransactionRequestDto } from '../dtos/transaction-request.dto';
+import { TransactionDto } from '../dtos/transaction.dto';
 
 @Injectable()
 export class TransactionService {
   constructor(
     @InjectRepository(Transaction)
     private transactionRepository: Repository<Transaction>,
-    private userService: UserService
+    @InjectRepository(User)
+    private userRepository: Repository<User>
   ) { }
 
-  async createBorrowTransaction(lenderId: number, borrowerId: number, amount: number): Promise<TransactionDto> {
-    const lender = await this.userService.findOne(lenderId);
-    const borrower = await this.userService.findOne(borrowerId);
+  async createTransaction(dto: TransactionRequestDto, type: 'borrow' | 'repay'): Promise<TransactionDto> {
     const transaction = this.transactionRepository.create({
-      lender,
-      borrower,
-      amount,
+      lender: { id: dto.lenderId },
+      borrower: { id: dto.borrowerId },
+      amount: dto.amount,
+      type: type,
+    });
+    const savedTransaction = await this.transactionRepository.save(transaction);
+    return this.toTransactionDto(savedTransaction);
+  }
+
+  private toTransactionDto(transaction: Transaction): TransactionDto {
+    return {
+      lenderUsername: transaction.lender.username,
+      borrowerUsername: transaction.borrower.username,
+      amount: transaction.amount,
+      type: transaction.type,
+      date: transaction.date,
+    };
+  }
+
+  async createBorrowTransaction(dto: TransactionRequestDto): Promise<TransactionDto> {
+    const lender = await this.userRepository.findOneBy({ id: dto.lenderId });
+    const borrower = await this.userRepository.findOneBy({ id: dto.borrowerId });
+
+    if (!lender || !borrower) {
+      throw new Error('Lender or Borrower not found');
+    }
+
+    const transaction = this.transactionRepository.create({
+      lender: lender,
+      borrower: borrower,
+      amount: dto.amount,
       type: 'borrow',
     });
-    const transactionSaveResult = await this.transactionRepository.save(transaction);
-    if (!transactionSaveResult) {
-      throw new HttpException("Cannot save data", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 
-    const response: TransactionDto = {
-      lender: transactionSaveResult.lender.username,
-      borrower: transactionSaveResult.borrower.username,
-      type: transactionSaveResult.type,
-      amount: transactionSaveResult.amount,
-      date: transactionSaveResult.date
-    }
-
-    return response;
+    const savedTransaction = await this.transactionRepository.save(transaction);
+    return this.toTransactionDto(savedTransaction);
   }
 
-  async createRepayTransaction(lenderId: number, borrowerId: number, amount: number): Promise<TransactionDto> {
-    const lender = await this.userService.findOne(lenderId);
-    const borrower = await this.userService.findOne(borrowerId);
+  async createRepayTransaction(dto: TransactionRequestDto): Promise<TransactionDto> {
+    const lender = await this.userRepository.findOneBy({ id: dto.lenderId });
+    const borrower = await this.userRepository.findOneBy({ id: dto.borrowerId });
+
+    if (!lender || !borrower) {
+      throw new Error('Lender or Borrower not found');
+    }
+
     const transaction = this.transactionRepository.create({
-      lender,
-      borrower,
-      amount,
+      lender: lender,
+      borrower: borrower,
+      amount: dto.amount,
       type: 'repay',
     });
-    const transactionSaveResult = await this.transactionRepository.save(transaction);
-    if (!transactionSaveResult) {
-      throw new HttpException("Cannot save data", HttpStatus.INTERNAL_SERVER_ERROR);
-    }
 
-    const response: TransactionDto = {
-      lender: transactionSaveResult.lender.username,
-      borrower: transactionSaveResult.borrower.username,
-      type: transactionSaveResult.type,
-      amount: transactionSaveResult.amount,
-      date: transactionSaveResult.date
-    }
-
-    return response;
+    const savedTransaction = await this.transactionRepository.save(transaction);
+    return this.toTransactionDto(savedTransaction);
   }
 
-  async getTotalAmount(userId: number): Promise<CreateTransactionDto> {
-    let totalBorrow = 0;
-    let totalRepay = 0;
-
-    const borrowList = await this.transactionRepository.find({
-      where: { lender: { id: userId }, type: 'borrow' },
-    })
-    borrowList.forEach(borrow => {
-      totalBorrow += borrow.amount;
+  async getTotalAmount(userId: number): Promise<number> {
+    const userTransactions = await this.transactionRepository.find({
+      where: [
+        { borrower: { id: userId }, type: 'repay' },
+        { borrower: { id: userId }, type: 'borrow' }
+      ],
+      relations: ['lender', 'borrower']
     });
 
-    const repayList = await this.transactionRepository.find({
-      where: { lender: { id: userId }, type: "repay" },
-    })
-    repayList.forEach(repay => {
-      totalRepay += repay.amount;
+    //TODO:
+    //Need to find other user Id to get amount and calculate borrow money
+    // const otherUserTransactions = await this.transactionRepository.find({
+    //   where: [
+    //     { borrower: { id: userId }, type: 'repay' },
+    //     { borrower: { id: userId }, type: 'borrow' }
+    //   ],
+    //   relations: ['lender', 'borrower']
+    // });
+
+
+    let total = 0;
+    userTransactions.forEach(txn => {
+      const amountChange = txn.type === 'borrow' ? -txn.amount : txn.amount;
+      total += amountChange;
     });
 
-    const totalAmount = totalRepay - totalBorrow;
+    // let otherUserTotal = 0;
+    // otherUserTransactions.forEach(txn => {
+    //   const amountChange = txn.type === 'borrow' ? -txn.amount : txn.amount;
+    //   otherUserTotal += amountChange;
+    // });
 
-    return { userId: userId, amount: totalAmount };
+    // if(userTotal < otherUserTotal) {
+    //   return userTotal + otherUserTotal;
+    // } 
+
+    return total;
   }
 
   async getTransactionsForUser(userId: number): Promise<TransactionDto[]> {
-    const transactionList = await this.transactionRepository.find({
+    const transactions = await this.transactionRepository.find({
       where: [{ lender: { id: userId } }, { borrower: { id: userId } }],
-      relations: ['lender', 'borrower'],
+      relations: ['lender', 'borrower']
     });
-    let result: TransactionDto[] = [];
-    transactionList.forEach(txn => {
-      result.push({
-        lender: txn.lender.username,
-        borrower: txn.borrower.username,
-        type: txn.type,
-        amount: txn.amount,
-        date: txn.date
-      })
-    })
-    return result;
+
+    return transactions.map(txn => this.toTransactionDto(txn));
   }
 
   async getTransactionsBetweenUsers(userAId: number, userBId: number): Promise<TransactionDto[]> {
-    const transactionList = await this.transactionRepository.find({
+    const transactions = await this.transactionRepository.find({
       where: [
-        { lender: { id: userAId }, borrower: { id: userBId } },
-        { lender: { id: userBId }, borrower: { id: userAId } },
+        { lender: { id: userAId } },
+        { borrower: { id: userAId } },
+        { lender: { id: userBId } },
+        { borrower: { id: userBId } }
       ],
-      relations: ['lender', 'borrower'],
+      relations: ['lender', 'borrower']
     });
-    let result: TransactionDto[] = [];
-    transactionList.forEach(txn => {
-      result.push({
-        lender: txn.lender.username,
-        borrower: txn.borrower.username,
-        type: txn.type,
-        amount: txn.amount,
-        date: txn.date
-      })
-    })
-    return result;
+
+    return transactions.map(txn => this.toTransactionDto(txn));
   }
 }

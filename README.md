@@ -11,23 +11,34 @@ Yuem Tang is a NestJS application designed to manage personal loans between user
     - [Users](#users)
     - [Transactions](#transactions)
 4. [Using the API](#using-the-api)
-5. [Development](#development)
+5. [Testing](#testing)
 
 ## Setup
 
 To set up the Yuem Tang API locally, follow these steps:
 
-1. **Configure the database:**
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/tavis161/yuem-tang.git
+   cd yuem-tang
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   npm install
+   ```
+
+3. **Configure the database:**
    - Ensure PostgreSQL is installed and running.
    - Create a database named `yuem_tang_db`.
 
-2. **Environment Configuration:**
+4. **Environment Configuration:**
    - Copy the `.env.example` file to `.env`.
    - Fill in the database connection details and JWT secret in the `.env` file.
 
-3. **Run the application:**
+5. **Run the application:**
    ```bash
-   npm run start
+   npm run start:dev
    ```
 
 ## Configuration
@@ -123,3 +134,11 @@ To use the API effectively, follow this workflow:
 1. **Register a User** using the POST `/users` endpoint.
 2. **Login** using the POST `/auth/login` endpoint to receive a JWT token.
 3. **Access Protected Routes** like user details or transactions using the JWT token received from login.
+
+## Testing
+
+Run tests using:
+
+```bash
+npm run test
+```
