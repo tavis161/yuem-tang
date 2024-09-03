@@ -1,16 +1,21 @@
-CREATE TABLE IF NOT EXISTS users (
+CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    username VARCHAR(100) NOT NULL UNIQUE,
-    password VARCHAR(100) NOT NULL
+    name VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS transactions (
+-- Create the transactions table
+CREATE TABLE transactions (
     id SERIAL PRIMARY KEY,
-    lenderId INT NOT NULL,
-    borrowerId INT NOT NULL,
+    lenderId INTEGER,
+    borrowerId INTEGER,
     amount DECIMAL(10, 2) NOT NULL,
-    type VARCHAR(10) NOT NULL,
+    type VARCHAR(10) CHECK (type IN ('borrow', 'repay')) NOT NULL,
     date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    FOREIGN KEY (lenderId) REFERENCES users (id),
-    FOREIGN KEY (borrowerId) REFERENCES users (id)
+    CONSTRAINT fk_lender
+        FOREIGN KEY(lenderId) 
+        REFERENCES users(id),
+    CONSTRAINT fk_borrower
+        FOREIGN KEY(borrowerId) 
+        REFERENCES users(id)
 );

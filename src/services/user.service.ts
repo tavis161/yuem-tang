@@ -13,12 +13,12 @@ export class UserService {
   ) {}
 
   async findByUsername(username: string): Promise<User> {
-    return this.userRepository.findOneBy({ name: username });
+    return this.userRepository.findOneBy({ usernme: username });
   }
 
-  async createUser(name: string, password: string): Promise<User> {
+  async createUser(usernme: string, password: string): Promise<User> {
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = this.userRepository.create({ name, password: hashedPassword });
+    const user = this.userRepository.create({ usernme: usernme, password: hashedPassword });
     return this.userRepository.save(user);
   }
 

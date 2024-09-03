@@ -1,14 +1,13 @@
-// user.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Transaction } from '../entities/transaction.entity';
 
-@Entity()
+@Entity('users')
 export class User {
   @PrimaryGeneratedColumn()
   id: number;
 
   @Column()
-  name: string;
+  usernme: string;
 
   @Column()
   password: string;
