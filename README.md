@@ -1,317 +1,125 @@
 
-# NestJS Loan Application
+# Yuem Tang API Documentation
 
-This project is a REST API for managing loan transactions between individuals, implemented using NestJS. The application allows users to borrow and repay money, view debt summaries, and view transaction histories. It includes JWT-based authentication and is set up to run inside a Docker container with a PostgreSQL database.
+Yuem Tang is a NestJS application designed to manage personal loans between users. It includes functionalities such as user registration, authentication, and tracking borrow and repay transactions.
 
-## Prerequisites
+## Table of Contents
+1. [Setup](#setup)
+2. [Configuration](#configuration)
+3. [API Endpoints](#api-endpoints)
+    - [Authentication](#authentication)
+    - [Users](#users)
+    - [Transactions](#transactions)
+4. [Using the API](#using-the-api)
+5. [Development](#development)
 
-- Node.js v18 or later
-- npm (Node Package Manager)
-- Docker and Docker Compose
-- PostgreSQL
+## Setup
 
-## Installation
+To set up the Yuem Tang API locally, follow these steps:
 
-1. Clone the repository:
+1. **Configure the database:**
+   - Ensure PostgreSQL is installed and running.
+   - Create a database named `yuem_tang_db`.
 
+2. **Environment Configuration:**
+   - Copy the `.env.example` file to `.env`.
+   - Fill in the database connection details and JWT secret in the `.env` file.
+
+3. **Run the application:**
    ```bash
-   git clone https://github.com/your-repo/nestjs-loan-app.git
-   cd nestjs-loan-app
+   npm run start
    ```
 
-2. Install dependencies:
+## Configuration
 
-   ```bash
-   npm install
-   ```
+The application requires configuration through environment variables as described in the `.env` file. Here are the key variables:
 
-## Environment Variables
+- `DATABASE_HOST` - The hostname of your PostgreSQL server.
+- `DATABASE_PORT` - The port your PostgreSQL server is running on.
+- `DATABASE_USER` - Your database user.
+- `DATABASE_PASSWORD` - Your database password.
+- `DATABASE_NAME` - The name of your database.
+- `JWT_SECRET` - A secret key for JWT token signing.
 
-Create a `.env` file in the root directory of the project based on the `.env.example` file. Replace the placeholders with your own values.
-
-```plaintext
-JWT_SECRET=your_jwt_secret
-DATABASE_HOST=localhost
-DATABASE_PORT=5432
-DATABASE_USER=user
-DATABASE_PASSWORD=password
-DATABASE_NAME=database
-```
-
-- `JWT_SECRET`: A random string for JWT authentication.
-- `DATABASE_*`: Credentials for connecting to the PostgreSQL database.
-
-## Running the Application
-
-### Without Docker
-
-1. Start the PostgreSQL database and create the required tables.
-2. Run the application:
-
-   ```bash
-   npm run start:dev
-   ```
-
-3. The application will be available at `http://localhost:3000`.
-
-### With Docker
-
-1. Build and run the application using Docker Compose:
-
-   ```bash
-   docker-compose up --build
-   ```
-
-2. The application will be available at `http://localhost:3000`.
-
-## API Documentation
+## API Endpoints
 
 ### Authentication
 
-#### Login
-
-- **URL**: `/auth/login`
-- **Method**: `POST`
-- **Description**: Authenticates a user and returns a JWT token.
-- **Request Body**:
-
-  ```json
-  {
-    "username": "user1",
-    "password": "password123"
-  }
-  ```
-
-- **Response**:
-
-  - **Status**: `200 OK`
+- **POST `/auth/login`** (Logs in a user)
+  - **Headers**:
+    - `Content-Type: application/json`
   - **Body**:
-
     ```json
     {
-      "access_token": "your_jwt_token"
+      "username": "testuser",
+      "password": "password123"
     }
     ```
+  - **Response**:
+    - `200 OK` with JWT token if successful.
+    - `401 Unauthorized` if credentials are incorrect.
 
 ### Users
 
-#### Create User
-
-- **URL**: `/users`
-- **Method**: `POST`
-- **Description**: Creates a new user.
-- **Request Body**:
-
-  ```json
-  {
-    "username": "user1",
-    "password": "password123"
-  }
-  ```
-
-- **Response**:
-
-  - **Status**: `201 Created`
+- **POST `/users`** (Creates a new user)
+  - **Headers**:
+    - `Content-Type: application/json`
   - **Body**:
-
     ```json
     {
-      "id": 1,
-      "username": "user1"
+      "username": "newuser",
+      "password": "newpassword"
     }
     ```
+  - **Response**:
+    - `201 Created` with user details if successful.
+    - `400 Bad Request` if the request is malformed.
 
-#### Get User
-
-- **URL**: `/users/:id`
-- **Method**: `GET`
-- **Description**: Retrieves a user by ID.
-- **Response**:
-
-  - **Status**: `200 OK`
-  - **Body**:
-
-    ```json
-    {
-      "id": 1,
-      "username": "user1"
-    }
-    ```
+- **GET `/users/{id}`** (Retrieves user details)
+  - **Headers**:
+    - `Authorization: Bearer <JWT_TOKEN>`
+  - **Response**:
+    - `200 OK` with user details if successful.
+    - `404 Not Found` if the user does not exist.
 
 ### Transactions
 
-#### Borrow Money
-
-- **URL**: `/transactions/borrow`
-- **Method**: `POST`
-- **Description**: Borrow money from another user.
-- **Request Header**:
-
-  ```json
-    Content-Type:application/json
-    Authorization:Bearer <TOKEN>
-  ```
-
-- **Request Body**:
-
-  ```json
-  {
-    "lenderId": 2,
-    "borrowerId": 1,
-    "amount": 300
-  }
-  ```
-
-- **Response**:
-
-  - **Status**: `201 Created`
+- **POST `/transactions/borrow`** (Records a borrowing transaction)
+  - **Headers**:
+    - `Content-Type: application/json`
+    - `Authorization: Bearer <JWT_TOKEN>`
   - **Body**:
-
     ```json
     {
-      "id": 1,
-      "lenderId": 2,
-      "borrowerId": 1,
-      "amount": 300,
-      "type": "borrow",
-      "date": "2024-08-28T12:34:56.789Z"
+      "lenderId": 1,
+      "borrowerId": 2,
+      "amount": 300.00
     }
     ```
+  - **Response**:
+    - `201 Created` if the transaction is successful.
+    - `400 Bad Request` if the input is invalid.
 
-#### Repay Money
-
-- **URL**: `/transactions/repay`
-- **Method**: `POST`
-- **Description**: Repay money to another user.
-- **Request Header**:
-
-  ```json
-    Content-Type:application/json
-    Authorization:Bearer <TOKEN>
-  ```
-
-- **Request Body**:
-
-  ```json
-  {
-    "lenderId": 2,
-    "borrowerId": 1,
-    "amount": 100
-  }
-  ```
-
-- **Response**:
-
-  - **Status**: `201 Created`
+- **POST `/transactions/repay`** (Records a repayment transaction)
+  - **Headers**:
+    - `Content-Type: application/json`
+    - `Authorization: Bearer <JWT_TOKEN>`
   - **Body**:
-
     ```json
     {
-      "id": 2,
-      "lenderId": 2,
-      "borrowerId": 1,
-      "amount": 100,
-      "type": "repay",
-      "date": "2024-08-28T12:35:56.789Z"
+      "lenderId": 1,
+      "borrowerId": 2,
+      "amount": 150.00
     }
     ```
+  - **Response**:
+    - `201 Created` if the transaction is successful.
+    - `400 Bad Request` if the input is invalid.
 
-#### Get Transaction History
+## Using the API
 
-- **URL**: `/transactions/:userId`
-- **Method**: `GET`
-- **Description**: Get transaction history for a specific user.
-- **Request Header**:
+To use the API effectively, follow this workflow:
 
-  ```json
-    Content-Type:application/json
-    Authorization:Bearer <TOKEN>
-  ```
-
-- **Response**:
-
-  - **Status**: `200 OK`
-  - **Body**:
-
-    ```json
-    [
-      {
-        "id": 1,
-        "lenderId": 2,
-        "borrowerId": 1,
-        "amount": 300,
-        "type": "borrow",
-        "date": "2024-08-28T12:34:56.789Z"
-      },
-      {
-        "id": 2,
-        "lenderId": 2,
-        "borrowerId": 1,
-        "amount": 100,
-        "type": "repay",
-        "date": "2024-08-28T12:35:56.789Z"
-      }
-    ]
-    ```
-
-#### Get Debt Summary
-
-- **URL**: `/transactions/summary/:userId`
-- **Method**: `GET`
-- **Description**: Get a debt summary for a specific user.
-- **Request Header**:
-
-  ```json
-    Content-Type:application/json
-    Authorization:Bearer <TOKEN>
-  ```
-  
-- **Response**:
-
-  - **Status**: `200 OK`
-  - **Body**:
-
-    ```json
-    {
-      "userId": 1,
-      "totalBorrowed": 300,
-      "totalRepaid": 100,
-      "currentDebt": 200
-    }
-    ```
-
-## Testing
-
-To run the unit tests for the application, use the following command:
-
-```bash
-npm run test
-```
-
-## Docker Usage
-
-### Building and Running the Docker Containers
-
-1. Build and run the Docker containers:
-
-   ```bash
-   docker-compose up --build
-   ```
-
-2. The NestJS application will be running on `http://localhost:3000` and the PostgreSQL database will be exposed on port `5432`.
-
-### Stopping the Containers
-
-To stop the Docker containers, use:
-
-```bash
-docker-compose down
-```
-
-### Rebuilding the Containers
-
-If you make changes to the code and need to rebuild the containers, use:
-
-```bash
-docker-compose up --build
-```
+1. **Register a User** using the POST `/users` endpoint.
+2. **Login** using the POST `/auth/login` endpoint to receive a JWT token.
+3. **Access Protected Routes** like user details or transactions using the JWT token received from login.
